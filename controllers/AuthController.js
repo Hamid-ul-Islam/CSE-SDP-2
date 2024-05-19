@@ -9,10 +9,10 @@ export const registerUser = async (req, res) => {
   req.body.password = hashedPass;
   req.body.batch = req.body.studentId.substring(4, 6);
   const newUser = new UserModel(req.body);
-  const { username } = req.body;
+  const { studentId } = req.body;
   try {
     // addition new
-    const oldUser = await UserModel.findOne({ username });
+    const oldUser = await UserModel.findOne({ studentId });
 
     if (oldUser)
       return res.status(400).json({ message: "User already exists" });
@@ -20,7 +20,7 @@ export const registerUser = async (req, res) => {
     // changed
     const user = await newUser.save();
     const token = jwt.sign(
-      { username: user.username, id: user._id },
+      { email: user.email, id: user._id },
       process.env.JWTKEY,
       { expiresIn: "1h" }
     );
@@ -36,12 +36,12 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(email, password)
+  console.log(email, password);
 
   try {
     const user = await UserModel.findOne({ email });
 
-    console.log(user)
+    console.log(user);
 
     if (user) {
       const validity = await bcrypt.compare(password, user.password);
